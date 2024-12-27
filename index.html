@@ -4,36 +4,23 @@ index.html
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Aufgabenliste Fabian</title>
+    <title>Aufgabenliste Fabian - Speicherfunktion</title>
     <style>
         body {
             font-family: Arial, sans-serif;
             text-align: center;
             margin: 20px;
         }
-        .tabs {
-            margin-bottom: 20px;
+        #matrix {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
         }
-        .tabs button {
-            margin: 5px;
-            padding: 10px 15px;
-            background-color: #007BFF;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-        .tabs button.active {
-            background-color: #0056b3;
-        }
-        .tabs button:hover {
-            background-color: #0056b3;
-        }
-        .tab-content {
-            display: none;
-        }
-        .tab-content.active {
-            display: block;
+        .quadrant {
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            padding: 20px;
+            min-height: 150px;
         }
         .task-list {
             list-style: none;
@@ -53,12 +40,6 @@ index.html
             border: 1px solid #ccc;
             border-radius: 5px;
         }
-        select {
-            margin-top: 10px;
-            padding: 5px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-        }
         button {
             margin-top: 10px;
             padding: 5px 10px;
@@ -71,109 +52,127 @@ index.html
         button:hover {
             background-color: #218838;
         }
+        .progress-bar {
+            height: 20px;
+            background-color: #f3f3f3;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            overflow: hidden;
+            margin: 10px 0;
+        }
+        .progress {
+            height: 100%;
+            background-color: #28a745;
+            width: 0%;
+        }
     </style>
 </head>
 <body>
-    <h1>Aufgabenliste Fabian</h1>
-    <div class="tabs">
-        <button class="active" onclick="showTab('today')">Heutige Aufgaben</button>
-        <button onclick="showTab('week')">Diese Woche</button>
-        <button onclick="showTab('future')">Zukünftige Aufgaben</button>
-        <button onclick="showTab('completed')">Erledigte Aufgaben</button>
-    </div>
-
-    <div id="today" class="tab-content active">
-        <h2>Heutige Aufgaben</h2>
-        <ul class="task-list"></ul>
-        <input type="text" id="task-input-1" placeholder="Neue Aufgabe...">
-        <select id="priority-1">
-            <option value="high">Dringend</option>
-            <option value="medium">Mittel</option>
-            <option value="low">Niedrig</option>
-        </select>
-        <button onclick="addTask('today', 'task-input-1', 'priority-1')">+ Aufgabe hinzufügen</button>
-    </div>
-
-    <div id="week" class="tab-content">
-        <h2>Diese Woche</h2>
-        <ul class="task-list"></ul>
-        <input type="text" id="task-input-2" placeholder="Neue Aufgabe...">
-        <select id="priority-2">
-            <option value="high">Dringend</option>
-            <option value="medium">Mittel</option>
-            <option value="low">Niedrig</option>
-        </select>
-        <button onclick="addTask('week', 'task-input-2', 'priority-2')">+ Aufgabe hinzufügen</button>
-    </div>
-
-    <div id="future" class="tab-content">
-        <h2>Zukünftige Aufgaben</h2>
-        <ul class="task-list"></ul>
-        <input type="text" id="task-input-3" placeholder="Neue Aufgabe...">
-        <select id="priority-3">
-            <option value="high">Dringend</option>
-            <option value="medium">Mittel</option>
-            <option value="low">Niedrig</option>
-        </select>
-        <button onclick="addTask('future', 'task-input-3', 'priority-3')">+ Aufgabe hinzufügen</button>
-    </div>
-
-    <div id="completed" class="tab-content">
-        <h2>Erledigte Aufgaben</h2>
-        <ul class="task-list"></ul>
+    <h1>Aufgabenliste Fabian - Mit Speicher</h1>
+    <div id="matrix">
+        <div class="quadrant" id="urgent-important">
+            <h2>Dringend & Wichtig</h2>
+            <div class="progress-bar"><div class="progress" id="progress-urgent-important"></div></div>
+            <ul class="task-list"></ul>
+            <input type="text" id="task-input-1" placeholder="Neue Aufgabe...">
+            <button onclick="addTask('urgent-important', 'task-input-1')">+ Aufgabe hinzufügen</button>
+        </div>
+        <div class="quadrant" id="not-urgent-important">
+            <h2>Wichtig, aber nicht dringend</h2>
+            <div class="progress-bar"><div class="progress" id="progress-not-urgent-important"></div></div>
+            <ul class="task-list"></ul>
+            <input type="text" id="task-input-2" placeholder="Neue Aufgabe...">
+            <button onclick="addTask('not-urgent-important', 'task-input-2')">+ Aufgabe hinzufügen</button>
+        </div>
+        <div class="quadrant" id="urgent-not-important">
+            <h2>Dringend, aber nicht wichtig</h2>
+            <div class="progress-bar"><div class="progress" id="progress-urgent-not-important"></div></div>
+            <ul class="task-list"></ul>
+            <input type="text" id="task-input-3" placeholder="Neue Aufgabe...">
+            <button onclick="addTask('urgent-not-important', 'task-input-3')">+ Aufgabe hinzufügen</button>
+        </div>
+        <div class="quadrant" id="not-urgent-not-important">
+            <h2>Weder dringend noch wichtig</h2>
+            <div class="progress-bar"><div class="progress" id="progress-not-urgent-not-important"></div></div>
+            <ul class="task-list"></ul>
+            <input type="text" id="task-input-4" placeholder="Neue Aufgabe...">
+            <button onclick="addTask('not-urgent-not-important', 'task-input-4')">+ Aufgabe hinzufügen</button>
+        </div>
     </div>
 
     <script>
-        function showTab(tabId) {
-            document.querySelectorAll('.tab-content').forEach(tab => {
-                tab.classList.remove('active');
-            });
-            document.querySelectorAll('.tabs button').forEach(button => {
-                button.classList.remove('active');
-            });
-            document.getElementById(tabId).classList.add('active');
-            document.querySelector(`.tabs button[onclick="showTab('${tabId}')"]`).classList.add('active');
-        }
-
-        function addTask(tabId, inputId, priorityId) {
+        // Aufgaben hinzufügen
+        function addTask(quadrantId, inputId) {
             const input = document.getElementById(inputId);
-            const priority = document.getElementById(priorityId).value;
             const taskText = input.value.trim();
             if (!taskText) return;
 
-            const taskList = document.querySelector(`#${tabId} .task-list`);
+            const taskList = document.querySelector(`#${quadrantId} .task-list`);
+            const listItem = createTaskItem(taskText, quadrantId);
+            taskList.appendChild(listItem);
+
+            input.value = '';
+            saveTasks();
+            updateProgress(quadrantId);
+        }
+
+        // Aufgabe erstellen
+        function createTaskItem(taskText, quadrantId, isChecked = false) {
             const listItem = document.createElement('li');
-
-            // Setze Farbe basierend auf Priorität
-            if (priority === "high") listItem.style.color = "red";
-            else if (priority === "medium") listItem.style.color = "orange";
-            else listItem.style.color = "green";
-
-            // Checkbox hinzufügen
             const checkbox = document.createElement('input');
             checkbox.type = 'checkbox';
+            checkbox.checked = isChecked;
             checkbox.onclick = () => {
-                listItem.style.textDecoration = checkbox.checked ? 'line-through' : 'none';
-                if (checkbox.checked) moveToCompleted(listItem);
+                updateProgress(quadrantId);
+                saveTasks();
             };
 
-            // Text der Aufgabe
             const text = document.createElement('span');
             text.textContent = taskText;
 
-            // Aufgabe einfügen
             listItem.appendChild(checkbox);
             listItem.appendChild(text);
-            taskList.appendChild(listItem);
-
-            // Eingabefeld leeren
-            input.value = '';
+            return listItem;
         }
 
-        function moveToCompleted(task) {
-            const completedList = document.querySelector('#completed .task-list');
-            completedList.appendChild(task);
+        // Fortschritt aktualisieren
+        function updateProgress(quadrantId) {
+            const taskList = document.querySelector(`#${quadrantId} .task-list`);
+            const tasks = taskList.querySelectorAll('li');
+            const completedTasks = taskList.querySelectorAll('input:checked');
+            const progress = tasks.length === 0 ? 0 : (completedTasks.length / tasks.length) * 100;
+            document.querySelector(`#progress-${quadrantId}`).style.width = `${progress}%`;
         }
+
+        // Aufgaben speichern
+        function saveTasks() {
+            const tasks = {};
+            document.querySelectorAll('.quadrant').forEach(quadrant => {
+                const quadrantId = quadrant.id;
+                const taskList = Array.from(quadrant.querySelectorAll('li')).map(li => ({
+                    text: li.querySelector('span').textContent,
+                    completed: li.querySelector('input').checked
+                }));
+                tasks[quadrantId] = taskList;
+            });
+            localStorage.setItem('tasks', JSON.stringify(tasks));
+        }
+
+        // Aufgaben laden
+        function loadTasks() {
+            const tasks = JSON.parse(localStorage.getItem('tasks')) || {};
+            Object.keys(tasks).forEach(quadrantId => {
+                const taskList = document.querySelector(`#${quadrantId} .task-list`);
+                tasks[quadrantId].forEach(task => {
+                    const listItem = createTaskItem(task.text, quadrantId, task.completed);
+                    taskList.appendChild(listItem);
+                });
+                updateProgress(quadrantId);
+            });
+        }
+
+        // Beim Start Aufgaben laden
+        window.onload = loadTasks;
     </script>
 </body>
 </html>
