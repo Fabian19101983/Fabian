@@ -4,14 +4,14 @@ index.html
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    </title>Aufgabenliste Fabian</title>
+    <title>Aufgabenliste Fabian</title>
     <style>
         body {
             font-family: Arial, sans-serif;
             text-align: center;
             margin: 20px;
         }
-        #matrix {
+        #list {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 10px;
@@ -43,43 +43,41 @@ index.html
         button {
             margin-top: 10px;
             padding: 5px 10px;
-            background-color: #007BFF;
+            background-color: #28a745;
             color: white;
             border: none;
             border-radius: 5px;
             cursor: pointer;
         }
         button:hover {
-            background-color: #0056b3;
+            background-color: #218838;
         }
     </style>
 </head>
 <body>
-    <h1>Eisenhower Matrix</h1>
-    <div id="matrix">
-        <div class="quadrant" id="urgent-important">
-            <h2>Dringend & Wichtig</h2>
+    <h1>Aufgabenliste Fabian</h1>
+    <div id="list">
+        <div class="quadrant" id="today-tasks">
+            <h2>Heutige Aufgaben</h2>
             <ul class="task-list"></ul>
             <input type="text" id="task-input-1" placeholder="Neue Aufgabe...">
-            <button onclick="addTask('urgent-important', 'task-input-1')">+ Aufgabe hinzufügen</button>
+            <button onclick="addTask('today-tasks', 'task-input-1')">+ Aufgabe hinzufügen</button>
         </div>
-        <div class="quadrant" id="not-urgent-important">
-            <h2>Wichtig, aber nicht dringend</h2>
+        <div class="quadrant" id="this-week-tasks">
+            <h2>Diese Woche</h2>
             <ul class="task-list"></ul>
             <input type="text" id="task-input-2" placeholder="Neue Aufgabe...">
-            <button onclick="addTask('not-urgent-important', 'task-input-2')">+ Aufgabe hinzufügen</button>
+            <button onclick="addTask('this-week-tasks', 'task-input-2')">+ Aufgabe hinzufügen</button>
         </div>
-        <div class="quadrant" id="urgent-not-important">
-            <h2>Dringend, aber nicht wichtig</h2>
+        <div class="quadrant" id="completed-tasks">
+            <h2>Erledigte Aufgaben</h2>
+            <ul class="task-list"></ul>
+        </div>
+        <div class="quadrant" id="future-tasks">
+            <h2>Zukünftige Aufgaben</h2>
             <ul class="task-list"></ul>
             <input type="text" id="task-input-3" placeholder="Neue Aufgabe...">
-            <button onclick="addTask('urgent-not-important', 'task-input-3')">+ Aufgabe hinzufügen</button>
-        </div>
-        <div class="quadrant" id="not-urgent-not-important">
-            <h2>Weder dringend noch wichtig</h2>
-            <ul class="task-list"></ul>
-            <input type="text" id="task-input-4" placeholder="Neue Aufgabe...">
-            <button onclick="addTask('not-urgent-not-important', 'task-input-4')">+ Aufgabe hinzufügen</button>
+            <button onclick="addTask('future-tasks', 'task-input-3')">+ Aufgabe hinzufügen</button>
         </div>
     </div>
     <script>
@@ -96,6 +94,9 @@ index.html
             checkbox.type = 'checkbox';
             checkbox.onclick = () => {
                 listItem.style.textDecoration = checkbox.checked ? 'line-through' : 'none';
+                if (checkbox.checked) {
+                    moveToCompleted(listItem);
+                }
             };
 
             // Text der Aufgabe
@@ -134,6 +135,11 @@ index.html
             const subtaskItem = document.createElement('li');
             subtaskItem.textContent = subtaskText;
             subtaskList.appendChild(subtaskItem);
+        }
+
+        function moveToCompleted(task) {
+            const completedList = document.querySelector('#completed-tasks .task-list');
+            completedList.appendChild(task);
         }
     </script>
 </body>
