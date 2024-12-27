@@ -4,7 +4,7 @@ index.html
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Aufgabenliste Fabian - Prozentbasierter Fortschritt</title>
+    <title>Aufgabenliste Fabian - Bilder & Änderbarer Fortschritt</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -33,7 +33,13 @@ index.html
             align-items: center;
             gap: 10px;
         }
-        input[type="text"], input[type="number"] {
+        .task-list img {
+            width: 50px;
+            height: 50px;
+            border-radius: 5px;
+            object-fit: cover;
+        }
+        input[type="text"], input[type="number"], input[type="url"] {
             margin-top: 10px;
             padding: 5px;
             border: 1px solid #ccc;
@@ -67,7 +73,7 @@ index.html
     </style>
 </head>
 <body>
-    <h1>Aufgabenliste Fabian - Prozentbasierter Fortschritt</h1>
+    <h1>Aufgabenliste Fabian - Bilder & Änderbarer Fortschritt</h1>
     <div id="matrix">
         <div class="quadrant" id="urgent-important">
             <h2>Dringend & Wichtig</h2>
@@ -75,7 +81,8 @@ index.html
             <ul class="task-list"></ul>
             <input type="text" id="task-input-1" placeholder="Neue Aufgabe...">
             <input type="number" id="progress-input-1" placeholder="Prozent (0–100)" min="0" max="100">
-            <button onclick="addTask('urgent-important', 'task-input-1', 'progress-input-1')">+ Aufgabe hinzufügen</button>
+            <input type="url" id="image-url-input-1" placeholder="Bild-URL (optional)">
+            <button onclick="addTask('urgent-important', 'task-input-1', 'progress-input-1', 'image-url-input-1')">+ Aufgabe hinzufügen</button>
         </div>
         <div class="quadrant" id="not-urgent-important">
             <h2>Wichtig, aber nicht dringend</h2>
@@ -83,7 +90,8 @@ index.html
             <ul class="task-list"></ul>
             <input type="text" id="task-input-2" placeholder="Neue Aufgabe...">
             <input type="number" id="progress-input-2" placeholder="Prozent (0–100)" min="0" max="100">
-            <button onclick="addTask('not-urgent-important', 'task-input-2', 'progress-input-2')">+ Aufgabe hinzufügen</button>
+            <input type="url" id="image-url-input-2" placeholder="Bild-URL (optional)">
+            <button onclick="addTask('not-urgent-important', 'task-input-2', 'progress-input-2', 'image-url-input-2')">+ Aufgabe hinzufügen</button>
         </div>
         <div class="quadrant" id="urgent-not-important">
             <h2>Dringend, aber nicht wichtig</h2>
@@ -91,7 +99,8 @@ index.html
             <ul class="task-list"></ul>
             <input type="text" id="task-input-3" placeholder="Neue Aufgabe...">
             <input type="number" id="progress-input-3" placeholder="Prozent (0–100)" min="0" max="100">
-            <button onclick="addTask('urgent-not-important', 'task-input-3', 'progress-input-3')">+ Aufgabe hinzufügen</button>
+            <input type="url" id="image-url-input-3" placeholder="Bild-URL (optional)">
+            <button onclick="addTask('urgent-not-important', 'task-input-3', 'progress-input-3', 'image-url-input-3')">+ Aufgabe hinzufügen</button>
         </div>
         <div class="quadrant" id="not-urgent-not-important">
             <h2>Weder dringend noch wichtig</h2>
@@ -99,16 +108,20 @@ index.html
             <ul class="task-list"></ul>
             <input type="text" id="task-input-4" placeholder="Neue Aufgabe...">
             <input type="number" id="progress-input-4" placeholder="Prozent (0–100)" min="0" max="100">
-            <button onclick="addTask('not-urgent-not-important', 'task-input-4', 'progress-input-4')">+ Aufgabe hinzufügen</button>
+            <input type="url" id="image-url-input-4" placeholder="Bild-URL (optional)">
+            <button onclick="addTask('not-urgent-not-important', 'task-input-4', 'progress-input-4', 'image-url-input-4')">+ Aufgabe hinzufügen</button>
         </div>
     </div>
 
     <script>
-        function addTask(quadrantId, inputId, progressInputId) {
-            const input = document.getElementById(inputId);
+        function addTask(quadrantId, taskInputId, progressInputId, imageInputId) {
+            const taskInput = document.getElementById(taskInputId);
             const progressInput = document.getElementById(progressInputId);
-            const taskText = input.value.trim();
+            const imageInput = document.getElementById(imageInputId);
+
+            const taskText = taskInput.value.trim();
             const taskProgress = parseInt(progressInput.value.trim(), 10);
+            const taskImage = imageInput.value.trim();
 
             if (!taskText || isNaN(taskProgress) || taskProgress < 0 || taskProgress > 100) {
                 alert("Bitte gültige Aufgabe und Prozentsatz (0–100) eingeben.");
@@ -116,23 +129,42 @@ index.html
             }
 
             const taskList = document.querySelector(`#${quadrantId} .task-list`);
-            const listItem = createTaskItem(taskText, taskProgress);
+            const listItem = createTaskItem(taskText, taskProgress, taskImage, quadrantId);
 
             taskList.appendChild(listItem);
 
-            input.value = '';
+            taskInput.value = '';
             progressInput.value = '';
+            imageInput.value = '';
             updateProgress(quadrantId);
         }
 
-        function createTaskItem(taskText, taskProgress) {
+        function createTaskItem(taskText, taskProgress, taskImage, quadrantId) {
             const listItem = document.createElement('li');
 
             const text = document.createElement('span');
             text.textContent = `${taskText} (${taskProgress}%)`;
 
+            const progressInput = document.createElement('input');
+            progressInput.type = 'number';
+            progressInput.value = taskProgress;
+            progressInput.min = 0;
+            progressInput.max = 100;
+            progressInput.onchange = () => {
+                listItem.dataset.progress = progressInput.value;
+                text.textContent = `${taskText} (${progressInput.value}%)`;
+                updateProgress(quadrantId);
+            };
+
+            if (taskImage) {
+                const img = document.createElement('img');
+                img.src = taskImage;
+                listItem.appendChild(img);
+            }
+
             listItem.dataset.progress = taskProgress;
             listItem.appendChild(text);
+            listItem.appendChild(progressInput);
 
             return listItem;
         }
