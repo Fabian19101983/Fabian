@@ -8,42 +8,19 @@ index.html
     <style>
         body {
             font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-        h1 {
-            margin: 20px 0;
+            text-align: center;
+            margin: 20px;
         }
         #matrix {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 10px;
-            width: 90%;
-            max-width: 600px;
         }
         .quadrant {
             border: 1px solid #ccc;
             border-radius: 8px;
-            padding: 10px;
+            padding: 20px;
             min-height: 150px;
-            position: relative;
-        }
-        .quadrant h2 {
-            margin-top: 0;
-        }
-        .add-task {
-            position: absolute;
-            bottom: 10px;
-            right: 10px;
-            background: #007BFF;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            padding: 5px 10px;
-            cursor: pointer;
         }
         .task-list {
             list-style: none;
@@ -52,10 +29,28 @@ index.html
         }
         .task-list li {
             margin: 5px 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        input[type="text"] {
+            width: calc(100% - 10px);
+            margin-top: 10px;
             padding: 5px;
-            background: #f9f9f9;
-            border: 1px solid #ddd;
-            border-radius: 4px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        button {
+            margin-top: 10px;
+            padding: 5px 10px;
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
         }
     </style>
 </head>
@@ -65,34 +60,80 @@ index.html
         <div class="quadrant" id="urgent-important">
             <h2>Dringend & Wichtig</h2>
             <ul class="task-list"></ul>
-            <button class="add-task" onclick="addTask('urgent-important')">+ Aufgabe</button>
+            <input type="text" id="task-input-1" placeholder="Neue Aufgabe...">
+            <button onclick="addTask('urgent-important', 'task-input-1')">+ Aufgabe hinzufügen</button>
         </div>
         <div class="quadrant" id="not-urgent-important">
             <h2>Wichtig, aber nicht dringend</h2>
             <ul class="task-list"></ul>
-            <button class="add-task" onclick="addTask('not-urgent-important')">+ Aufgabe</button>
+            <input type="text" id="task-input-2" placeholder="Neue Aufgabe...">
+            <button onclick="addTask('not-urgent-important', 'task-input-2')">+ Aufgabe hinzufügen</button>
         </div>
         <div class="quadrant" id="urgent-not-important">
             <h2>Dringend, aber nicht wichtig</h2>
             <ul class="task-list"></ul>
-            <button class="add-task" onclick="addTask('urgent-not-important')">+ Aufgabe</button>
+            <input type="text" id="task-input-3" placeholder="Neue Aufgabe...">
+            <button onclick="addTask('urgent-not-important', 'task-input-3')">+ Aufgabe hinzufügen</button>
         </div>
         <div class="quadrant" id="not-urgent-not-important">
             <h2>Weder dringend noch wichtig</h2>
             <ul class="task-list"></ul>
-            <button class="add-task" onclick="addTask('not-urgent-not-important')">+ Aufgabe</button>
+            <input type="text" id="task-input-4" placeholder="Neue Aufgabe...">
+            <button onclick="addTask('not-urgent-not-important', 'task-input-4')">+ Aufgabe hinzufügen</button>
         </div>
     </div>
-
     <script>
-        function addTask(quadrantId) {
-            const task = prompt("Neue Aufgabe hinzufügen:");
-            if (task) {
-                const list = document.querySelector(`#${quadrantId} .task-list`);
-                const listItem = document.createElement("li");
-                listItem.textContent = task;
-                list.appendChild(listItem);
+        function addTask(quadrantId, inputId) {
+            const input = document.getElementById(inputId);
+            const taskText = input.value.trim();
+            if (!taskText) return;
+
+            const taskList = document.querySelector(`#${quadrantId} .task-list`);
+            const listItem = document.createElement('li');
+
+            // Checkbox
+            const checkbox = document.createElement('input');
+            checkbox.type = 'checkbox';
+            checkbox.onclick = () => {
+                listItem.style.textDecoration = checkbox.checked ? 'line-through' : 'none';
+            };
+
+            // Text der Aufgabe
+            const text = document.createElement('span');
+            text.textContent = taskText;
+
+            // Button für Unterpunkte
+            const subtaskButton = document.createElement('button');
+            subtaskButton.textContent = '+ Unterpunkt';
+            subtaskButton.onclick = () => addSubtask(listItem);
+
+            // Aufgabe einfügen
+            listItem.appendChild(checkbox);
+            listItem.appendChild(text);
+            listItem.appendChild(subtaskButton);
+            taskList.appendChild(listItem);
+
+            // Eingabefeld leeren
+            input.value = '';
+        }
+
+        function addSubtask(parentTask) {
+            const subtaskText = prompt('Unterpunkt hinzufügen:');
+            if (!subtaskText) return;
+
+            // Erstelle Unterpunkt-Liste, falls noch nicht vorhanden
+            let subtaskList = parentTask.querySelector('ul');
+            if (!subtaskList) {
+                subtaskList = document.createElement('ul');
+                subtaskList.style.marginLeft = '20px';
+                subtaskList.style.listStyle = 'circle';
+                parentTask.appendChild(subtaskList);
             }
+
+            // Neuen Unterpunkt hinzufügen
+            const subtaskItem = document.createElement('li');
+            subtaskItem.textContent = subtaskText;
+            subtaskList.appendChild(subtaskItem);
         }
     </script>
 </body>
