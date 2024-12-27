@@ -1,0 +1,99 @@
+index.html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Eisenhower Matrix</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        h1 {
+            margin: 20px 0;
+        }
+        #matrix {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            width: 90%;
+            max-width: 600px;
+        }
+        .quadrant {
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            padding: 10px;
+            min-height: 150px;
+            position: relative;
+        }
+        .quadrant h2 {
+            margin-top: 0;
+        }
+        .add-task {
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            background: #007BFF;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 5px 10px;
+            cursor: pointer;
+        }
+        .task-list {
+            list-style: none;
+            padding: 0;
+            margin: 10px 0;
+        }
+        .task-list li {
+            margin: 5px 0;
+            padding: 5px;
+            background: #f9f9f9;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Eisenhower Matrix</h1>
+    <div id="matrix">
+        <div class="quadrant" id="urgent-important">
+            <h2>Dringend & Wichtig</h2>
+            <ul class="task-list"></ul>
+            <button class="add-task" onclick="addTask('urgent-important')">+ Aufgabe</button>
+        </div>
+        <div class="quadrant" id="not-urgent-important">
+            <h2>Wichtig, aber nicht dringend</h2>
+            <ul class="task-list"></ul>
+            <button class="add-task" onclick="addTask('not-urgent-important')">+ Aufgabe</button>
+        </div>
+        <div class="quadrant" id="urgent-not-important">
+            <h2>Dringend, aber nicht wichtig</h2>
+            <ul class="task-list"></ul>
+            <button class="add-task" onclick="addTask('urgent-not-important')">+ Aufgabe</button>
+        </div>
+        <div class="quadrant" id="not-urgent-not-important">
+            <h2>Weder dringend noch wichtig</h2>
+            <ul class="task-list"></ul>
+            <button class="add-task" onclick="addTask('not-urgent-not-important')">+ Aufgabe</button>
+        </div>
+    </div>
+
+    <script>
+        function addTask(quadrantId) {
+            const task = prompt("Neue Aufgabe hinzufügen:");
+            if (task) {
+                const list = document.querySelector(`#${quadrantId} .task-list`);
+                const listItem = document.createElement("li");
+                listItem.textContent = task;
+                list.appendChild(listItem);
+            }
+        }
+    </script>
+</body>
+</html>
