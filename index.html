@@ -4,7 +4,7 @@ index.html
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Aufgabenliste Fabian - Deadlines & Sortierung</title>
+    <title>Aufgabenliste Fabian</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -74,7 +74,7 @@ index.html
     </style>
 </head>
 <body>
-    <h1>Aufgabenliste Fabian - Deadlines & Sortierung</h1>
+    <h1>Aufgabenliste Fabian</h1>
 
     <div class="filters">
         <button onclick="filterTasks('all')">Alle Aufgaben</button>
@@ -125,4 +125,77 @@ index.html
     <script>
         function addTask(quadrantId, taskInputId, progressInputId, deadlineInputId) {
             const taskInput = document.getElementById(taskInputId);
-            const progressInput = document.getElementById(progressInput
+            const progressInput = document.getElementById(progressInputId);
+            const deadlineInput = document.getElementById(deadlineInputId);
+
+            const taskText = taskInput.value.trim();
+            const taskProgress = parseInt(progressInput.value.trim(), 10);
+            const taskDeadline = deadlineInput.value;
+
+            if (!taskText || isNaN(taskProgress) || taskProgress < 0 || taskProgress > 100 || !taskDeadline) {
+                alert("Bitte alle Felder korrekt ausfüllen.");
+                return;
+            }
+
+            const taskList = document.querySelector(`#${quadrantId} .task-list`);
+            const listItem = createTaskItem(taskText, taskProgress, taskDeadline, quadrantId);
+
+            taskList.appendChild(listItem);
+            taskInput.value = '';
+            progressInput.value = '';
+            deadlineInput.value = '';
+            updateProgress(quadrantId);
+        }
+
+        function createTaskItem(taskText, taskProgress, taskDeadline, quadrantId) {
+            const listItem = document.createElement('li');
+            const text = document.createElement('span');
+            text.textContent = `${taskText} (${taskProgress}%) - Deadline: ${taskDeadline}`;
+
+            const progressInput = document.createElement('input');
+            progressInput.type = 'number';
+            progressInput.value = taskProgress;
+            progressInput.min = 0;
+            progressInput.max = 100;
+            progressInput.onchange = () => {
+                listItem.dataset.progress = progressInput.value;
+                text.textContent = `${taskText} (${progressInput.value}%) - Deadline: ${taskDeadline}`;
+                updateProgress(quadrantId);
+            };
+
+            const deadlineSpan = document.createElement('span');
+            deadlineSpan.textContent = `Fällig: ${taskDeadline}`;
+            if (new Date(taskDeadline) < new Date()) {
+                deadlineSpan.classList.add('overdue');
+            }
+
+            listItem.dataset.progress = taskProgress;
+            listItem.appendChild(text);
+            listItem.appendChild(progressInput);
+            listItem.appendChild(deadlineSpan);
+
+            return listItem;
+        }
+
+        function updateProgress(quadrantId) {
+            const taskList = document.querySelector(`#${quadrantId} .task-list`);
+            const tasks = Array.from(taskList.children);
+            const totalProgress = tasks.reduce((sum, task) => sum + parseInt(task.dataset.progress, 10), 0);
+            const averageProgress = tasks.length > 0 ? totalProgress / tasks.length : 0;
+            document.querySelector(`#progress-${quadrantId}`).style.width = `${averageProgress}%`;
+        }
+
+        function filterTasks(filterType) {
+            document.querySelectorAll('.task-list li').forEach(task => {
+                const progress = parseInt(task.dataset.progress, 10);
+                const deadline = new Date(task.dataset.deadline || Date.now());
+                task.style.display = '';
+
+                if (filterType === 'open' && progress === 100) task.style.display = 'none';
+                if (filterType === 'completed' && progress < 100) task.style.display = 'none';
+                if (filterType === 'overdue' && deadline >= new Date()) task.style.display = 'none';
+            });
+        }
+    </script>
+</body>
+</html>
