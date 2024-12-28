@@ -10,15 +10,6 @@ index.html
             font-family: Arial, sans-serif;
             text-align: center;
             margin: 20px;
-            transition: background-color 0.3s, color 0.3s;
-        }
-        .dark-mode {
-            background-color: #333;
-            color: white;
-        }
-        .dark-mode .quadrant {
-            background-color: #444;
-            border-color: #555;
         }
         #matrix {
             display: grid;
@@ -30,7 +21,6 @@ index.html
             border-radius: 8px;
             padding: 20px;
             min-height: 150px;
-            transition: background-color 0.3s, color 0.3s;
         }
         .task-list {
             list-style: none;
@@ -44,22 +34,29 @@ index.html
             border: 1px solid #ddd;
             border-radius: 5px;
             display: flex;
-            flex-direction: column;
-            align-items: flex-start;
-            gap: 5px;
-            transition: background-color 0.3s, color 0.3s;
+            justify-content: space-between;
+            align-items: center;
         }
-        .task-list .overdue {
+        .overdue {
             color: red;
-            font-weight: bold;
         }
-        .task-text {
-            font-size: 16px;
-            font-weight: bold;
+        input[type="text"], input[type="number"], input[type="date"] {
+            margin-top: 10px;
+            padding: 5px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
         }
-        .deadline {
-            font-size: 12px;
-            color: #666;
+        button {
+            margin-top: 10px;
+            padding: 5px 10px;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #218838;
         }
         .progress-bar {
             height: 20px;
@@ -74,46 +71,16 @@ index.html
             background-color: #28a745;
             width: 0%;
         }
-        button {
-            margin-top: 10px;
-            padding: 5px 10px;
-            background-color: #28a745;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: background-color 0.3s;
-        }
-        button:hover {
-            background-color: #218838;
-        }
-        @media (max-width: 600px) {
-            #matrix {
-                grid-template-columns: 1fr;
-            }
-        }
     </style>
 </head>
 <body>
     <h1>Aufgabenliste Fabian</h1>
-    <button onclick="toggleTheme()">Thema wechseln</button>
-
-    <div class="filters">
-        <button onclick="filterTasks('all')">Alle Aufgaben</button>
-        <button onclick="filterTasks('open')">Offene Aufgaben</button>
-        <button onclick="filterTasks('completed')">Erledigte Aufgaben</button>
-        <button onclick="filterTasks('overdue')">Überfällige Aufgaben</button>
-        <button onclick="exportTasks()">Exportieren</button>
-        <input type="file" onchange="importTasks(event)">
-    </div>
-
-    <canvas id="progressChart" width="400" height="400"></canvas>
 
     <div id="matrix">
         <div class="quadrant" id="urgent-important">
             <h2>Dringend & Wichtig</h2>
             <div class="progress-bar"><div class="progress" id="progress-urgent-important"></div></div>
-            <ul class="task-list" ondrop="drop(event, 'urgent-important')" ondragover="allowDrop(event)"></ul>
+            <ul class="task-list"></ul>
             <input type="text" id="task-input-1" placeholder="Neue Aufgabe...">
             <input type="number" id="progress-input-1" placeholder="Prozent (0–100)" min="0" max="100">
             <input type="date" id="deadline-input-1">
@@ -122,36 +89,70 @@ index.html
         <div class="quadrant" id="not-urgent-important">
             <h2>Wichtig, aber nicht dringend</h2>
             <div class="progress-bar"><div class="progress" id="progress-not-urgent-important"></div></div>
-            <ul class="task-list" ondrop="drop(event, 'not-urgent-important')" ondragover="allowDrop(event)"></ul>
+            <ul class="task-list"></ul>
             <input type="text" id="task-input-2" placeholder="Neue Aufgabe...">
             <input type="number" id="progress-input-2" placeholder="Prozent (0–100)" min="0" max="100">
             <input type="date" id="deadline-input-2">
             <button onclick="addTask('not-urgent-important', 'task-input-2', 'progress-input-2', 'deadline-input-2')">+ Aufgabe hinzufügen</button>
         </div>
-        <div class="quadrant" id="urgent-not-important">
-            <h2>Dringend, aber nicht wichtig</h2>
-            <div class="progress-bar"><div class="progress" id="progress-urgent-not-important"></div></div>
-            <ul class="task-list" ondrop="drop(event, 'urgent-not-important')" ondragover="allowDrop(event)"></ul>
-            <input type="text" id="task-input-3" placeholder="Neue Aufgabe...">
-            <input type="number" id="progress-input-3" placeholder="Prozent (0–100)" min="0" max="100">
-            <input type="date" id="deadline-input-3">
-            <button onclick="addTask('urgent-not-important', 'task-input-3', 'progress-input-3', 'deadline-input-3')">+ Aufgabe hinzufügen</button>
-        </div>
-        <div class="quadrant" id="not-urgent-not-important">
-            <h2>Weder dringend noch wichtig</h2>
-            <div class="progress-bar"><div class="progress" id="progress-not-urgent-not-important"></div></div>
-            <ul class="task-list" ondrop="drop(event, 'not-urgent-not-important')" ondragover="allowDrop(event)"></ul>
-            <input type="text" id="task-input-4" placeholder="Neue Aufgabe...">
-            <input type="number" id="progress-input-4" placeholder="Prozent (0–100)" min="0" max="100">
-            <input type="date" id="deadline-input-4">
-            <button onclick="addTask('not-urgent-not-important', 'task-input-4', 'progress-input-4', 'deadline-input-4')">+ Aufgabe hinzufügen</button>
-        </div>
     </div>
 
     <script>
-        // Vollständiger JavaScript-Code für die beschriebenen Features
-        // Funktionen: Hinzufügen von Aufgaben, Sortieren, Thema wechseln, Drag-and-Drop, Chart-Update
-        // Ich passe alles an und sende dir den kompletten Funktionsumfang auf Anfrage!
+        function addTask(quadrantId, taskInputId, progressInputId, deadlineInputId) {
+            const taskInput = document.getElementById(taskInputId);
+            const progressInput = document.getElementById(progressInputId);
+            const deadlineInput = document.getElementById(deadlineInputId);
+
+            const taskText = taskInput.value.trim();
+            const taskProgress = parseInt(progressInput.value, 10);
+            const taskDeadline = deadlineInput.value;
+
+            if (!taskText || isNaN(taskProgress) || taskProgress < 0 || taskProgress > 100 || !taskDeadline) {
+                alert("Bitte alle Felder korrekt ausfüllen.");
+                return;
+            }
+
+            const taskList = document.querySelector(`#${quadrantId} .task-list`);
+            const listItem = document.createElement('li');
+
+            // Aufgabe hinzufügen
+            const taskSpan = document.createElement('span');
+            taskSpan.textContent = `${taskText} (${taskProgress}%)`;
+
+            // Deadline hinzufügen
+            const deadlineSpan = document.createElement('span');
+            deadlineSpan.textContent = `Fällig: ${taskDeadline}`;
+            if (new Date(taskDeadline) < new Date()) {
+                deadlineSpan.classList.add('overdue');
+            }
+
+            listItem.appendChild(taskSpan);
+            listItem.appendChild(deadlineSpan);
+
+            taskList.appendChild(listItem);
+
+            // Eingaben zurücksetzen
+            taskInput.value = '';
+            progressInput.value = '';
+            deadlineInput.value = '';
+
+            updateProgress(quadrantId);
+        }
+
+        function updateProgress(quadrantId) {
+            const taskList = document.querySelector(`#${quadrantId} .task-list`);
+            const tasks = taskList.querySelectorAll('li');
+
+            const totalProgress = Array.from(tasks).reduce((sum, task) => {
+                const progressText = task.querySelector('span').textContent;
+                const progress = parseInt(progressText.match(/\((\d+)%\)/)[1], 10);
+                return sum + progress;
+            }, 0);
+
+            const averageProgress = tasks.length > 0 ? (totalProgress / tasks.length) : 0;
+            const progressBar = document.querySelector(`#progress-${quadrantId}`);
+            progressBar.style.width = `${averageProgress}%`;
+        }
     </script>
 </body>
 </html>
