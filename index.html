@@ -73,10 +73,20 @@ index.html
             background-color: #28a745;
             width: 0%;
         }
+        .hidden {
+            display: none;
+        }
     </style>
 </head>
 <body>
     <h1>Aufgabenliste Fabian</h1>
+
+    <div class="filters">
+        <button onclick="filterTasks('all')">Alle Aufgaben</button>
+        <button onclick="filterTasks('open')">Offene Aufgaben</button>
+        <button onclick="filterTasks('completed')">Erledigte Aufgaben</button>
+        <button onclick="filterTasks('overdue')">Überfällige Aufgaben</button>
+    </div>
 
     <div id="matrix">
         <div class="quadrant" id="urgent-important">
@@ -97,6 +107,10 @@ index.html
             <input type="date" id="deadline-input-2">
             <button onclick="addTask('not-urgent-important', 'task-input-2', 'progress-input-2', 'deadline-input-2')">+ Aufgabe hinzufügen</button>
         </div>
+        <div class="quadrant" id="completed-tasks">
+            <h2>Erledigte Aufgaben</h2>
+            <ul class="task-list"></ul>
+        </div>
     </div>
 
     <script>
@@ -109,18 +123,31 @@ index.html
             const taskProgress = parseInt(progressInput.value, 10);
             const taskDeadline = deadlineInput.value;
 
-            // Eingaben überprüfen
-            if (!taskText || isNaN(taskProgress) || taskProgress < 0 || taskProgress > 100 || !taskDeadline) {
-                alert("Bitte alle Felder korrekt ausfüllen.");
+            if (!taskText) {
+                alert("Bitte eine Aufgabe eingeben.");
+                return;
+            }
+            if (isNaN(taskProgress) || taskProgress < 0 || taskProgress > 100) {
+                alert("Bitte eine gültige Prozentzahl (0-100) eingeben.");
+                return;
+            }
+            if (!taskDeadline) {
+                alert("Bitte ein gültiges Datum eingeben.");
                 return;
             }
 
-            // Aufgabe erstellen
             const taskList = document.querySelector(`#${quadrantId} .task-list`);
             const listItem = document.createElement('li');
 
             const taskSpan = document.createElement('span');
             taskSpan.textContent = `${taskText} (${taskProgress}%)`;
+
+            const editProgress = document.createElement('input');
+            editProgress.type = "number";
+            editProgress.min = 0;
+            editProgress.max = 100;
+            editProgress.value = taskProgress;
+            editProgress.onchange = () => updateTaskProgress(listItem, editProgress.value, quadrantId);
 
             const deadlineSpan = document.createElement('span');
             deadlineSpan.textContent = `Fällig: ${taskDeadline}`;
@@ -129,15 +156,33 @@ index.html
             }
 
             listItem.appendChild(taskSpan);
+            listItem.appendChild(editProgress);
             listItem.appendChild(deadlineSpan);
 
-            // Aufgabe zur Liste hinzufügen
-            taskList.appendChild(listItem);
+            if (taskProgress === 100) {
+                document.querySelector("#completed-tasks .task-list").appendChild(listItem);
+            } else {
+                taskList.appendChild(listItem);
+            }
 
-            // Eingabefelder zurücksetzen
             taskInput.value = '';
             progressInput.value = '';
             deadlineInput.value = '';
+
+            updateProgress(quadrantId);
+        }
+
+        function updateTaskProgress(taskItem, newProgress, quadrantId) {
+            const taskSpan = taskItem.querySelector('span');
+            const taskText = taskSpan.textContent.split('(')[0].trim();
+            taskSpan.textContent = `${taskText} (${newProgress}%)`;
+
+            if (newProgress === "100") {
+                document.querySelector("#completed-tasks .task-list").appendChild(taskItem);
+            } else {
+                const taskList = document.querySelector(`#${quadrantId} .task-list`);
+                taskList.appendChild(taskItem);
+            }
 
             updateProgress(quadrantId);
         }
