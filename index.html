@@ -37,7 +37,7 @@ index.html
             justify-content: space-between;
             align-items: center;
         }
-        .task-list .overdue {
+        .overdue {
             color: red;
             font-weight: bold;
         }
@@ -46,6 +46,7 @@ index.html
             padding: 5px;
             border: 1px solid #ccc;
             border-radius: 5px;
+            width: 80%;
         }
         button {
             margin-top: 10px;
@@ -108,19 +109,19 @@ index.html
             const taskProgress = parseInt(progressInput.value, 10);
             const taskDeadline = deadlineInput.value;
 
+            // Eingaben überprüfen
             if (!taskText || isNaN(taskProgress) || taskProgress < 0 || taskProgress > 100 || !taskDeadline) {
                 alert("Bitte alle Felder korrekt ausfüllen.");
                 return;
             }
 
+            // Aufgabe erstellen
             const taskList = document.querySelector(`#${quadrantId} .task-list`);
             const listItem = document.createElement('li');
 
-            // Aufgabe hinzufügen
             const taskSpan = document.createElement('span');
             taskSpan.textContent = `${taskText} (${taskProgress}%)`;
 
-            // Deadline hinzufügen
             const deadlineSpan = document.createElement('span');
             deadlineSpan.textContent = `Fällig: ${taskDeadline}`;
             if (new Date(taskDeadline) < new Date()) {
@@ -130,9 +131,10 @@ index.html
             listItem.appendChild(taskSpan);
             listItem.appendChild(deadlineSpan);
 
+            // Aufgabe zur Liste hinzufügen
             taskList.appendChild(listItem);
 
-            // Eingaben zurücksetzen
+            // Eingabefelder zurücksetzen
             taskInput.value = '';
             progressInput.value = '';
             deadlineInput.value = '';
