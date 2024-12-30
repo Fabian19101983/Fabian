@@ -74,76 +74,65 @@ index.html
             background-color: #28a745;
             width: 0%;
         }
+        #remaining-time {
+            font-size: 18px;
+            margin: 20px 0;
+            color: #555;
+        }
+        #remaining-time span {
+            font-weight: bold;
+        }
     </style>
 </head>
 <body>
     <h1>Aufgabenliste Fabian</h1>
 
-    <div class="filters">
-        <button onclick="filterTasks('all')">Alle Aufgaben</button>
-        <button onclick="filterTasks('open')">Offene Aufgaben</button>
-        <button onclick="filterTasks('completed')">Erledigte Aufgaben</button>
-        <button onclick="filterTasks('overdue')">Überfällige Aufgaben</button>
+    <div id="remaining-time">
+        Verbleibende Arbeitszeit: <span id="work-hours">8:00</span> Stunden
     </div>
 
     <div id="matrix">
         <div class="quadrant" id="urgent-important">
             <h2>Dringend & Wichtig</h2>
-            <div class="progress-bar"><div class="progress" id="progress-urgent-important"></div></div>
             <ul class="task-list"></ul>
             <input type="text" id="task-input-1" placeholder="Neue Aufgabe...">
             <input type="number" id="progress-input-1" placeholder="Prozent (0–100)" min="0" max="100">
             <input type="date" id="deadline-input-1">
-            <button onclick="setToday('deadline-input-1')">Heute</button>
-            <button onclick="addTask('urgent-important', 'task-input-1', 'progress-input-1', 'deadline-input-1')">+ Aufgabe hinzufügen</button>
+            <input type="number" id="time-input-1" placeholder="Zeit (in Stunden)" min="0" step="0.1">
+            <button onclick="addTask('urgent-important', 'task-input-1', 'progress-input-1', 'deadline-input-1', 'time-input-1')">+ Aufgabe hinzufügen</button>
         </div>
         <div class="quadrant" id="not-urgent-important">
             <h2>Wichtig, aber nicht dringend</h2>
-            <div class="progress-bar"><div class="progress" id="progress-not-urgent-important"></div></div>
             <ul class="task-list"></ul>
             <input type="text" id="task-input-2" placeholder="Neue Aufgabe...">
             <input type="number" id="progress-input-2" placeholder="Prozent (0–100)" min="0" max="100">
             <input type="date" id="deadline-input-2">
-            <button onclick="setToday('deadline-input-2')">Heute</button>
-            <button onclick="addTask('not-urgent-important', 'task-input-2', 'progress-input-2', 'deadline-input-2')">+ Aufgabe hinzufügen</button>
-        </div>
-        <div class="quadrant" id="urgent-not-important">
-            <h2>Dringend, aber nicht wichtig</h2>
-            <div class="progress-bar"><div class="progress" id="progress-urgent-not-important"></div></div>
-            <ul class="task-list"></ul>
-            <input type="text" id="task-input-3" placeholder="Neue Aufgabe...">
-            <input type="number" id="progress-input-3" placeholder="Prozent (0–100)" min="0" max="100">
-            <input type="date" id="deadline-input-3">
-            <button onclick="setToday('deadline-input-3')">Heute</button>
-            <button onclick="addTask('urgent-not-important', 'task-input-3', 'progress-input-3', 'deadline-input-3')">+ Aufgabe hinzufügen</button>
-        </div>
-        <div class="quadrant" id="not-urgent-not-important">
-            <h2>Weder dringend noch wichtig</h2>
-            <div class="progress-bar"><div class="progress" id="progress-not-urgent-not-important"></div></div>
-            <ul class="task-list"></ul>
-            <input type="text" id="task-input-4" placeholder="Neue Aufgabe...">
-            <input type="number" id="progress-input-4" placeholder="Prozent (0–100)" min="0" max="100">
-            <input type="date" id="deadline-input-4">
-            <button onclick="setToday('deadline-input-4')">Heute</button>
-            <button onclick="addTask('not-urgent-not-important', 'task-input-4', 'progress-input-4', 'deadline-input-4')">+ Aufgabe hinzufügen</button>
+            <input type="number" id="time-input-2" placeholder="Zeit (in Stunden)" min="0" step="0.1">
+            <button onclick="addTask('not-urgent-important', 'task-input-2', 'progress-input-2', 'deadline-input-2', 'time-input-2')">+ Aufgabe hinzufügen</button>
         </div>
     </div>
 
     <script>
-        // Funktion, um das Datum auf heute zu setzen
-        function setToday(inputId) {
-            const today = new Date().toISOString().split('T')[0];
-            document.getElementById(inputId).value = today;
+        const workDayHours = 8; // Arbeitszeit pro Tag in Stunden
+        let remainingWorkHours = workDayHours;
+
+        function updateRemainingTime() {
+            const remainingTimeElement = document.getElementById('work-hours');
+            const hours = Math.floor(remainingWorkHours);
+            const minutes = Math.round((remainingWorkHours - hours) * 60);
+            remainingTimeElement.textContent = `${hours}:${minutes.toString().padStart(2, '0')}`;
         }
 
-        function addTask(quadrantId, taskInputId, progressInputId, deadlineInputId) {
+        function addTask(quadrantId, taskInputId, progressInputId, deadlineInputId, timeInputId) {
             const taskInput = document.getElementById(taskInputId);
             const progressInput = document.getElementById(progressInputId);
             const deadlineInput = document.getElementById(deadlineInputId);
+            const timeInput = document.getElementById(timeInputId);
 
             const taskText = taskInput.value.trim();
             const taskProgress = parseInt(progressInput.value, 10);
             const taskDeadline = deadlineInput.value;
+            const taskTime = parseFloat(timeInput.value);
 
             if (!taskText) {
                 alert("Bitte eine Aufgabe eingeben.");
@@ -157,12 +146,16 @@ index.html
                 alert("Bitte ein gültiges Datum eingeben.");
                 return;
             }
+            if (isNaN(taskTime) || taskTime <= 0) {
+                alert("Bitte eine gültige Zeit eingeben.");
+                return;
+            }
 
             const taskList = document.querySelector(`#${quadrantId} .task-list`);
             const listItem = document.createElement('li');
 
             const taskSpan = document.createElement('span');
-            taskSpan.textContent = `${taskText} (${taskProgress}%)`;
+            taskSpan.textContent = `${taskText} (${taskProgress}%) - ${taskTime}h`;
 
             const editProgress = document.createElement('input');
             editProgress.type = "number";
@@ -180,22 +173,30 @@ index.html
             listItem.appendChild(editProgress);
             listItem.appendChild(editDeadline);
 
-            // Überprüfen, ob die Aufgabe heute fällig ist
-            const today = new Date().toISOString().split('T')[0];
-            if (taskDeadline === today) {
-                alert(`Die Aufgabe "${taskText}" ist heute fällig!`);
-            }
+            taskList.appendChild(listItem);
 
-            if (taskProgress === 100) {
-                document.querySelector("#completed-tasks .task-list").appendChild(listItem);
-            } else {
-                taskList.appendChild(listItem);
-            }
+            // Reduzieren der verbleibenden Arbeitszeit
+            remainingWorkHours -= taskTime;
+            updateRemainingTime();
 
             taskInput.value = '';
             progressInput.value = '';
             deadlineInput.value = '';
+            timeInput.value = '';
         }
+
+        function updateTaskProgress(taskItem, newProgress, quadrantId) {
+            const taskSpan = taskItem.querySelector('span');
+            const taskText = taskSpan.textContent.split('(')[0].trim();
+            taskSpan.textContent = `${taskText} (${newProgress}%)`;
+        }
+
+        function updateTaskDeadline(taskItem, newDeadline) {
+            const deadlineInput = taskItem.querySelector('input[type="date"]');
+            deadlineInput.value = newDeadline;
+        }
+
+        updateRemainingTime(); // Initiale Aktualisierung
     </script>
 </body>
 </html>
