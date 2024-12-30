@@ -16,13 +16,13 @@ index.html
             grid-template-columns: repeat(5, 1fr);
             gap: 10px;
         }
-        .day {
+        .day, #completed-tasks {
             border: 1px solid #ccc;
             border-radius: 8px;
             padding: 20px;
             min-height: 300px;
         }
-        .day h2 {
+        .day h2, #completed-tasks h2 {
             margin-bottom: 10px;
         }
         .task-list {
@@ -99,6 +99,11 @@ index.html
             <div class="day-time">Verbleibende Zeit: <span id="time-friday">8:00</span> Stunden</div>
             <ul class="task-list" data-day="friday"></ul>
         </div>
+    </div>
+
+    <div id="completed-tasks">
+        <h2>Erledigte Aufgaben</h2>
+        <ul class="task-list" id="completed-task-list"></ul>
     </div>
 
     <h2>Neue Aufgabe hinzufügen</h2>
@@ -178,18 +183,21 @@ index.html
             }
 
             const taskList = document.querySelector(`#${taskDay} .task-list`);
+            const completedTaskList = document.getElementById('completed-task-list');
             const listItem = document.createElement('li');
             listItem.textContent = `${taskText} (${taskProgress}%) - ${taskTime}h - Priorität ${taskPriority}`;
             listItem.dataset.priority = taskPriority;
 
-            // Aufgaben sortieren
-            const tasks = Array.from(taskList.querySelectorAll('li'));
-            tasks.push(listItem);
-            tasks.sort((a, b) => a.dataset.priority.localeCompare(b.dataset.priority));
-            taskList.innerHTML = '';
-            tasks.forEach(task => taskList.appendChild(task));
-
-            taskList.appendChild(listItem);
+            // Prüfen, ob Aufgabe erledigt ist
+            if (taskProgress === 100) {
+                completedTaskList.appendChild(listItem);
+            } else {
+                const tasks = Array.from(taskList.querySelectorAll('li'));
+                tasks.push(listItem);
+                tasks.sort((a, b) => a.dataset.priority.localeCompare(b.dataset.priority));
+                taskList.innerHTML = '';
+                tasks.forEach(task => taskList.appendChild(task));
+            }
 
             remainingDayHours[taskDay] -= taskTime;
             remainingWeekHours -= taskTime;
