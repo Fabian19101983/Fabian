@@ -4,23 +4,26 @@ index.html
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Aufgabenliste Fabian</title>
+    <title>Wochenplaner Fabian</title>
     <style>
         body {
             font-family: Arial, sans-serif;
             text-align: center;
             margin: 20px;
         }
-        #matrix {
+        #week {
             display: grid;
-            grid-template-columns: 1fr 1fr;
+            grid-template-columns: repeat(5, 1fr);
             gap: 10px;
         }
-        .quadrant {
+        .day {
             border: 1px solid #ccc;
             border-radius: 8px;
             padding: 20px;
-            min-height: 200px;
+            min-height: 300px;
+        }
+        .day h2 {
+            margin-bottom: 10px;
         }
         .task-list {
             list-style: none;
@@ -33,15 +36,8 @@ index.html
             background-color: #f9f9f9;
             border: 1px solid #ddd;
             border-radius: 5px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
         }
-        .overdue {
-            background-color: #ffe6e6; /* Rot-Hintergrund für überfällige Aufgaben */
-        }
-        input[type="text"], input[type="number"], input[type="date"], select {
+        input[type="text"], input[type="number"], select {
             margin-top: 10px;
             padding: 5px;
             border: 1px solid #ccc;
@@ -60,19 +56,6 @@ index.html
         button:hover {
             background-color: #218838;
         }
-        .progress-bar {
-            height: 20px;
-            background-color: #f3f3f3;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            overflow: hidden;
-            margin: 10px 0;
-        }
-        .progress {
-            height: 100%;
-            background-color: #28a745;
-            width: 0%;
-        }
         #remaining-time {
             font-size: 18px;
             margin: 20px 0;
@@ -84,123 +67,140 @@ index.html
     </style>
 </head>
 <body>
-    <h1>Aufgabenliste Fabian</h1>
+    <h1>Wochenplaner Fabian</h1>
 
     <div id="remaining-time">
-        Verbleibende Arbeitszeit: <span id="work-hours">8:00</span> Stunden
+        Verbleibende Arbeitszeit für die Woche: <span id="total-work-hours">40:00</span> Stunden
     </div>
 
-    <div id="matrix">
-        <div class="quadrant" id="urgent-important">
-            <h2>Dringend & Wichtig</h2>
-            <ul class="task-list"></ul>
-            <input type="text" id="task-input-1" placeholder="Neue Aufgabe...">
-            <input type="number" id="progress-input-1" placeholder="Prozent (0–100)" min="0" max="100">
-            <input type="date" id="deadline-input-1">
-            <input type="number" id="time-input-1" placeholder="Zeit (in Stunden)" min="0" step="0.1">
-            <select id="weekday-input-1">
-                <option value="Montag">Montag</option>
-                <option value="Dienstag">Dienstag</option>
-                <option value="Mittwoch">Mittwoch</option>
-                <option value="Donnerstag">Donnerstag</option>
-                <option value="Freitag">Freitag</option>
-                <option value="Samstag">Samstag</option>
-                <option value="Sonntag">Sonntag</option>
-            </select>
-            <select id="priority-input-1">
-                <option value="I">Priorität I</option>
-                <option value="II">Priorität II</option>
-                <option value="III">Priorität III</option>
-                <option value="IV">Priorität IV</option>
-            </select>
-            <button onclick="addTask('urgent-important', 'task-input-1', 'progress-input-1', 'deadline-input-1', 'time-input-1', 'weekday-input-1', 'priority-input-1')">+ Aufgabe hinzufügen</button>
+    <div id="week">
+        <div class="day" id="monday">
+            <h2>Montag</h2>
+            <div class="day-time">Verbleibende Zeit: <span id="time-monday">8:00</span> Stunden</div>
+            <ul class="task-list" data-day="monday"></ul>
+        </div>
+        <div class="day" id="tuesday">
+            <h2>Dienstag</h2>
+            <div class="day-time">Verbleibende Zeit: <span id="time-tuesday">8:00</span> Stunden</div>
+            <ul class="task-list" data-day="tuesday"></ul>
+        </div>
+        <div class="day" id="wednesday">
+            <h2>Mittwoch</h2>
+            <div class="day-time">Verbleibende Zeit: <span id="time-wednesday">8:00</span> Stunden</div>
+            <ul class="task-list" data-day="wednesday"></ul>
+        </div>
+        <div class="day" id="thursday">
+            <h2>Donnerstag</h2>
+            <div class="day-time">Verbleibende Zeit: <span id="time-thursday">8:00</span> Stunden</div>
+            <ul class="task-list" data-day="thursday"></ul>
+        </div>
+        <div class="day" id="friday">
+            <h2>Freitag</h2>
+            <div class="day-time">Verbleibende Zeit: <span id="time-friday">8:00</span> Stunden</div>
+            <ul class="task-list" data-day="friday"></ul>
         </div>
     </div>
 
-    <script>
-        const workDayHours = 8; // Arbeitszeit pro Tag in Stunden
-        let remainingWorkHours = workDayHours;
+    <h2>Neue Aufgabe hinzufügen</h2>
+    <input type="text" id="task-input" placeholder="Aufgabe...">
+    <input type="number" id="progress-input" placeholder="Prozent (0-100)" min="0" max="100">
+    <input type="number" id="time-input" placeholder="Dauer (in Stunden)" min="0" step="0.1">
+    <select id="day-input">
+        <option value="monday">Montag</option>
+        <option value="tuesday">Dienstag</option>
+        <option value="wednesday">Mittwoch</option>
+        <option value="thursday">Donnerstag</option>
+        <option value="friday">Freitag</option>
+    </select>
+    <select id="priority-input">
+        <option value="I">Priorität I</option>
+        <option value="II">Priorität II</option>
+        <option value="III">Priorität III</option>
+        <option value="IV">Priorität IV</option>
+    </select>
+    <button onclick="addTask()">Aufgabe hinzufügen</button>
 
-        function updateRemainingTime() {
-            const remainingTimeElement = document.getElementById('work-hours');
-            const hours = Math.floor(remainingWorkHours);
-            const minutes = Math.round((remainingWorkHours - hours) * 60);
-            remainingTimeElement.textContent = `${hours}:${minutes.toString().padStart(2, '0')}`;
+    <script>
+        const dailyWorkHours = 8;
+        const totalWeekHours = 40;
+
+        let remainingWeekHours = totalWeekHours;
+        const remainingDayHours = {
+            monday: dailyWorkHours,
+            tuesday: dailyWorkHours,
+            wednesday: dailyWorkHours,
+            thursday: dailyWorkHours,
+            friday: dailyWorkHours,
+        };
+
+        function updateTime() {
+            document.getElementById('total-work-hours').textContent = formatTime(remainingWeekHours);
+            for (const day in remainingDayHours) {
+                document.getElementById(`time-${day}`).textContent = formatTime(remainingDayHours[day]);
+            }
         }
 
-        function addTask(quadrantId, taskInputId, progressInputId, deadlineInputId, timeInputId, weekdayInputId, priorityInputId) {
-            const taskInput = document.getElementById(taskInputId);
-            const progressInput = document.getElementById(progressInputId);
-            const deadlineInput = document.getElementById(deadlineInputId);
-            const timeInput = document.getElementById(timeInputId);
-            const weekdayInput = document.getElementById(weekdayInputId);
-            const priorityInput = document.getElementById(priorityInputId);
+        function formatTime(hours) {
+            const h = Math.floor(hours);
+            const m = Math.round((hours - h) * 60);
+            return `${h}:${m.toString().padStart(2, '0')}`;
+        }
+
+        function addTask() {
+            const taskInput = document.getElementById('task-input');
+            const progressInput = document.getElementById('progress-input');
+            const timeInput = document.getElementById('time-input');
+            const dayInput = document.getElementById('day-input');
+            const priorityInput = document.getElementById('priority-input');
 
             const taskText = taskInput.value.trim();
             const taskProgress = parseInt(progressInput.value, 10);
-            const taskDeadline = deadlineInput.value;
             const taskTime = parseFloat(timeInput.value);
-            const taskWeekday = weekdayInput.value;
+            const taskDay = dayInput.value;
             const taskPriority = priorityInput.value;
 
             if (!taskText) {
-                alert("Bitte eine Aufgabe eingeben.");
+                alert('Bitte eine Aufgabe eingeben.');
                 return;
             }
             if (isNaN(taskProgress) || taskProgress < 0 || taskProgress > 100) {
-                alert("Bitte eine gültige Prozentzahl (0-100) eingeben.");
-                return;
-            }
-            if (!taskDeadline) {
-                alert("Bitte ein gültiges Datum eingeben.");
+                alert('Bitte eine gültige Prozentzahl (0-100) eingeben.');
                 return;
             }
             if (isNaN(taskTime) || taskTime <= 0) {
-                alert("Bitte eine gültige Zeit eingeben.");
+                alert('Bitte eine gültige Zeit eingeben.');
                 return;
             }
 
-            const taskList = document.querySelector(`#${quadrantId} .task-list`);
-            const listItem = document.createElement('li');
-
-            const taskSpan = document.createElement('span');
-            taskSpan.textContent = `${taskText} (${taskProgress}%) - ${taskTime}h - ${taskWeekday} - Priorität ${taskPriority}`;
-
-            const editProgress = document.createElement('input');
-            editProgress.type = "number";
-            editProgress.min = 0;
-            editProgress.max = 100;
-            editProgress.value = taskProgress;
-            editProgress.onchange = () => updateTaskProgress(listItem, editProgress.value, quadrantId);
-
-            const editDeadline = document.createElement('input');
-            editDeadline.type = "date";
-            editDeadline.value = taskDeadline;
-            editDeadline.onchange = () => updateTaskDeadline(listItem, editDeadline.value);
-
-            listItem.appendChild(taskSpan);
-            listItem.appendChild(editProgress);
-            listItem.appendChild(editDeadline);
-
-            // Überprüfen, ob die Aufgabe heute oder überfällig ist
-            const today = new Date().toISOString().split('T')[0];
-            if (taskDeadline === today || new Date(taskDeadline) < new Date(today)) {
-                listItem.classList.add('overdue');
+            if (remainingDayHours[taskDay] < taskTime) {
+                alert('Nicht genug verbleibende Zeit an diesem Tag.');
+                return;
             }
+
+            const taskList = document.querySelector(`#${taskDay} .task-list`);
+            const listItem = document.createElement('li');
+            listItem.textContent = `${taskText} (${taskProgress}%) - ${taskTime}h - Priorität ${taskPriority}`;
+            listItem.dataset.priority = taskPriority;
+
+            // Aufgaben sortieren
+            const tasks = Array.from(taskList.querySelectorAll('li'));
+            tasks.push(listItem);
+            tasks.sort((a, b) => a.dataset.priority.localeCompare(b.dataset.priority));
+            taskList.innerHTML = '';
+            tasks.forEach(task => taskList.appendChild(task));
 
             taskList.appendChild(listItem);
 
-            // Reduzieren der verbleibenden Arbeitszeit
-            remainingWorkHours -= taskTime;
-            updateRemainingTime();
+            remainingDayHours[taskDay] -= taskTime;
+            remainingWeekHours -= taskTime;
+            updateTime();
 
             taskInput.value = '';
             progressInput.value = '';
-            deadlineInput.value = '';
             timeInput.value = '';
         }
 
-        updateRemainingTime(); // Initiale Aktualisierung
+        updateTime();
     </script>
 </body>
 </html>
