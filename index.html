@@ -8,13 +8,16 @@ index.html
     <style>
         body {
             font-family: Arial, sans-serif;
-            text-align: center;
             margin: 20px;
+        }
+        h1, h2 {
+            text-align: center;
         }
         #week {
             display: grid;
             grid-template-columns: repeat(5, 1fr);
             gap: 10px;
+            margin-top: 20px;
         }
         .day, #completed-tasks {
             border: 1px solid #ccc;
@@ -24,6 +27,7 @@ index.html
         }
         .day h2, #completed-tasks h2 {
             margin-bottom: 10px;
+            text-align: center;
         }
         .task-list {
             list-style: none;
@@ -36,6 +40,19 @@ index.html
             background-color: #f9f9f9;
             border: 1px solid #ddd;
             border-radius: 5px;
+        }
+        .task-progress {
+            height: 10px;
+            background-color: #ddd;
+            border-radius: 5px;
+            margin: 5px 0;
+            overflow: hidden;
+        }
+        .task-progress-bar {
+            height: 100%;
+            width: 0;
+            background-color: green;
+            transition: width 0.3s;
         }
         input[type="text"], input[type="number"], select {
             margin-top: 10px;
@@ -56,19 +73,13 @@ index.html
         button:hover {
             background-color: #218838;
         }
-        #remaining-time {
-            font-size: 18px;
-            margin: 20px 0;
-            color: #555;
-        }
-        #remaining-time span {
-            font-weight: bold;
+        .highlight {
+            background-color: #ffcccc;
         }
     </style>
 </head>
 <body>
     <h1>Wochenplaner Fabian</h1>
-
     <div id="remaining-time">
         Verbleibende Arbeitszeit für die Woche: <span id="total-work-hours">40:00</span> Stunden
     </div>
@@ -164,16 +175,8 @@ index.html
             const taskDay = dayInput.value;
             const taskPriority = priorityInput.value;
 
-            if (!taskText) {
-                alert('Bitte eine Aufgabe eingeben.');
-                return;
-            }
-            if (isNaN(taskProgress) || taskProgress < 0 || taskProgress > 100) {
-                alert('Bitte eine gültige Prozentzahl (0-100) eingeben.');
-                return;
-            }
-            if (isNaN(taskTime) || taskTime <= 0) {
-                alert('Bitte eine gültige Zeit eingeben.');
+            if (!taskText || isNaN(taskProgress) || taskProgress < 0 || taskProgress > 100 || isNaN(taskTime) || taskTime <= 0) {
+                alert('Bitte alle Felder korrekt ausfüllen.');
                 return;
             }
 
@@ -188,15 +191,18 @@ index.html
             listItem.textContent = `${taskText} (${taskProgress}%) - ${taskTime}h - Priorität ${taskPriority}`;
             listItem.dataset.priority = taskPriority;
 
-            // Prüfen, ob Aufgabe erledigt ist
-            if (taskProgress === 100) {
+            const progressBar = document.createElement('div');
+            progressBar.className = 'task-progress';
+            const progressBarFill = document.createElement('div');
+            progressBarFill.className = 'task-progress-bar';
+            progressBarFill.style.width = `${taskProgress}%`;
+            progressBar.appendChild(progressBarFill);
+
+            if (taskProgress >= 100) {
                 completedTaskList.appendChild(listItem);
             } else {
-                const tasks = Array.from(taskList.querySelectorAll('li'));
-                tasks.push(listItem);
-                tasks.sort((a, b) => a.dataset.priority.localeCompare(b.dataset.priority));
-                taskList.innerHTML = '';
-                tasks.forEach(task => taskList.appendChild(task));
+                listItem.appendChild(progressBar);
+                taskList.appendChild(listItem);
             }
 
             remainingDayHours[taskDay] -= taskTime;
