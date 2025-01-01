@@ -19,13 +19,13 @@ index.html
             gap: 10px;
             margin-top: 20px;
         }
-        .day, #completed-tasks {
+        .day {
             border: 1px solid #ccc;
             border-radius: 8px;
             padding: 20px;
             min-height: 300px;
         }
-        .day h2, #completed-tasks h2 {
+        .day h2 {
             margin-bottom: 10px;
             text-align: center;
         }
@@ -40,19 +40,6 @@ index.html
             background-color: #f9f9f9;
             border: 1px solid #ddd;
             border-radius: 5px;
-        }
-        .task-progress {
-            height: 10px;
-            background-color: #ddd;
-            border-radius: 5px;
-            margin: 5px 0;
-            overflow: hidden;
-        }
-        .task-progress-bar {
-            height: 100%;
-            width: 0;
-            background-color: green;
-            transition: width 0.3s;
         }
         input[type="text"], input[type="number"], select {
             margin-top: 10px;
@@ -73,53 +60,44 @@ index.html
         button:hover {
             background-color: #218838;
         }
-        .highlight {
-            background-color: #ffcccc;
-        }
     </style>
 </head>
 <body>
     <h1>Wochenplaner Fabian</h1>
     <div id="remaining-time">
-        Verbleibende Arbeitszeit für die Woche: <span id="total-work-hours">40:00</span> Stunden
+        Verfügbare Planungszeit für die Woche: <span id="total-work-hours">31:30</span> Stunden
     </div>
 
     <div id="week">
         <div class="day" id="monday">
             <h2>Montag</h2>
-            <div class="day-time">Verbleibende Zeit: <span id="time-monday">8:00</span> Stunden</div>
+            <div class="day-time">Verfügbare Planungszeit: <span id="time-monday">5:30</span> Stunden</div>
             <ul class="task-list" data-day="monday"></ul>
         </div>
         <div class="day" id="tuesday">
             <h2>Dienstag</h2>
-            <div class="day-time">Verbleibende Zeit: <span id="time-tuesday">8:00</span> Stunden</div>
+            <div class="day-time">Verfügbare Planungszeit: <span id="time-tuesday">5:30</span> Stunden</div>
             <ul class="task-list" data-day="tuesday"></ul>
         </div>
         <div class="day" id="wednesday">
             <h2>Mittwoch</h2>
-            <div class="day-time">Verbleibende Zeit: <span id="time-wednesday">8:00</span> Stunden</div>
+            <div class="day-time">Verfügbare Planungszeit: <span id="time-wednesday">5:30</span> Stunden</div>
             <ul class="task-list" data-day="wednesday"></ul>
         </div>
         <div class="day" id="thursday">
             <h2>Donnerstag</h2>
-            <div class="day-time">Verbleibende Zeit: <span id="time-thursday">8:00</span> Stunden</div>
+            <div class="day-time">Verfügbare Planungszeit: <span id="time-thursday">5:30</span> Stunden</div>
             <ul class="task-list" data-day="thursday"></ul>
         </div>
         <div class="day" id="friday">
             <h2>Freitag</h2>
-            <div class="day-time">Verbleibende Zeit: <span id="time-friday">8:00</span> Stunden</div>
+            <div class="day-time">Verfügbare Planungszeit: <span id="time-friday">3:54</span> Stunden</div>
             <ul class="task-list" data-day="friday"></ul>
         </div>
     </div>
 
-    <div id="completed-tasks">
-        <h2>Erledigte Aufgaben</h2>
-        <ul class="task-list" id="completed-task-list"></ul>
-    </div>
-
     <h2>Neue Aufgabe hinzufügen</h2>
     <input type="text" id="task-input" placeholder="Aufgabe...">
-    <input type="number" id="progress-input" placeholder="Prozent (0-100)" min="0" max="100">
     <input type="number" id="time-input" placeholder="Dauer (in Stunden)" min="0" step="0.1">
     <select id="day-input">
         <option value="monday">Montag</option>
@@ -128,32 +106,33 @@ index.html
         <option value="thursday">Donnerstag</option>
         <option value="friday">Freitag</option>
     </select>
-    <select id="priority-input">
-        <option value="I">Priorität I</option>
-        <option value="II">Priorität II</option>
-        <option value="III">Priorität III</option>
-        <option value="IV">Priorität IV</option>
-    </select>
     <button onclick="addTask()">Aufgabe hinzufügen</button>
 
     <script>
-        const dailyWorkHours = 8;
-        const totalWeekHours = 40;
+        const dailyWorkHours = {
+            monday: 8.5 * 0.65, // 65% der Arbeitszeit für geplante Aufgaben
+            tuesday: 8.5 * 0.65,
+            wednesday: 8.5 * 0.65,
+            thursday: 8.5 * 0.65,
+            friday: 6 * 0.65
+        };
 
-        let remainingWeekHours = totalWeekHours;
         const remainingDayHours = {
-            monday: dailyWorkHours,
-            tuesday: dailyWorkHours,
-            wednesday: dailyWorkHours,
-            thursday: dailyWorkHours,
-            friday: dailyWorkHours,
+            monday: dailyWorkHours.monday,
+            tuesday: dailyWorkHours.tuesday,
+            wednesday: dailyWorkHours.wednesday,
+            thursday: dailyWorkHours.thursday,
+            friday: dailyWorkHours.friday
         };
 
         function updateTime() {
-            document.getElementById('total-work-hours').textContent = formatTime(remainingWeekHours);
-            for (const day in remainingDayHours) {
-                document.getElementById(`time-${day}`).textContent = formatTime(remainingDayHours[day]);
+            let totalHours = 0;
+            for (const day in dailyWorkHours) {
+                const hours = remainingDayHours[day];
+                totalHours += hours;
+                document.getElementById(`time-${day}`).textContent = formatTime(hours);
             }
+            document.getElementById('total-work-hours').textContent = formatTime(totalHours);
         }
 
         function formatTime(hours) {
@@ -164,53 +143,32 @@ index.html
 
         function addTask() {
             const taskInput = document.getElementById('task-input');
-            const progressInput = document.getElementById('progress-input');
             const timeInput = document.getElementById('time-input');
             const dayInput = document.getElementById('day-input');
-            const priorityInput = document.getElementById('priority-input');
 
             const taskText = taskInput.value.trim();
-            const taskProgress = parseInt(progressInput.value, 10);
             const taskTime = parseFloat(timeInput.value);
             const taskDay = dayInput.value;
-            const taskPriority = priorityInput.value;
 
-            if (!taskText || isNaN(taskProgress) || taskProgress < 0 || taskProgress > 100 || isNaN(taskTime) || taskTime <= 0) {
-                alert('Bitte alle Felder korrekt ausfüllen.');
+            if (!taskText || isNaN(taskTime) || taskTime <= 0) {
+                alert('Bitte eine gültige Aufgabe und Zeit eingeben.');
                 return;
             }
 
             if (remainingDayHours[taskDay] < taskTime) {
-                alert('Nicht genug verbleibende Zeit an diesem Tag.');
+                alert('Nicht genug Zeit verfügbar.');
                 return;
             }
 
             const taskList = document.querySelector(`#${taskDay} .task-list`);
-            const completedTaskList = document.getElementById('completed-task-list');
             const listItem = document.createElement('li');
-            listItem.textContent = `${taskText} (${taskProgress}%) - ${taskTime}h - Priorität ${taskPriority}`;
-            listItem.dataset.priority = taskPriority;
-
-            const progressBar = document.createElement('div');
-            progressBar.className = 'task-progress';
-            const progressBarFill = document.createElement('div');
-            progressBarFill.className = 'task-progress-bar';
-            progressBarFill.style.width = `${taskProgress}%`;
-            progressBar.appendChild(progressBarFill);
-
-            if (taskProgress >= 100) {
-                completedTaskList.appendChild(listItem);
-            } else {
-                listItem.appendChild(progressBar);
-                taskList.appendChild(listItem);
-            }
+            listItem.textContent = `${taskText} (${taskTime} Stunden)`;
+            taskList.appendChild(listItem);
 
             remainingDayHours[taskDay] -= taskTime;
-            remainingWeekHours -= taskTime;
             updateTime();
 
             taskInput.value = '';
-            progressInput.value = '';
             timeInput.value = '';
         }
 
